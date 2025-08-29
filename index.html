@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Capacidade New Tech 2025 - Honda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 100%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #e74c3c);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .report-title {
+            font-size: 22px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section.warning {
+            border-left-color: #e74c3c;
+        }
+
+        .section.success {
+            border-left-color: #27ae60;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .icon-params {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .icon-results {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .icon-analysis {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .icon-chart {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e0e6ed;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: #3498db;
+        }
+
+        .result-value.warning {
+            color: #e74c3c;
+        }
+
+        .result-value.success {
+            color: #27ae60;
+        }
+
+        .verdict {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .verdict.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .verdict.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .verdict.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .chart-container {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 5px solid #9b59b6;
+        }
+
+        .chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 300px;
+            margin: 30px 0;
+            gap: 60px;
+        }
+
+        .chart-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 250px;
+        }
+
+        .chart-bar {
+            width: 50px;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            padding-bottom: 8px;
+        }
+
+        .chart-bar:hover {
+            transform: scale(1.05);
+        }
+
+        .chart-bar.capacity {
+            background: linear-gradient(180deg, #3498db, #2980b9);
+        }
+
+        .chart-bar.effort {
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+        }
+
+        .chart-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-color.capacity {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .legend-color.effort {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .date-info {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1, #d5dbdb);
+            border-radius: 10px;
+            color: #2c3e50;
+        }
+
+        .current-date {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .days-remaining {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .chart {
+                gap: 30px;
+                height: 250px;
+            }
+            
+            .chart-bars {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">NT</div>
+                    <div>
+                        <h1 class="company-name">New Tech</h1>
+                    </div>
+                </div>
+                <h2 class="report-title">Análise de Capacidade 2025 - Relatório Executivo</h2>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="section">
+                <h3 class="section-title">
+                    <span class="section-icon icon-params">📊</span>
+                    Parâmetros de Entrada
+                </h3>
+                
+                <div class="input-group">
+                    <label class="input-label">Trabalhos Já Entregues (2025)</label>
+                    <input type="number" id="trabalhosEntregues" class="input-field" value="103" oninput="calcular()">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Dias Úteis Já Passados</label>
+                    <input type="number" id="diasPassados" class="input-field" value="168" oninput="calcular()">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Trabalhos Pendentes</label>
+                    <input type="number" id="trabalhosPendentes" class="input-field" value="59" oninput="calcular()">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Dias Úteis Restantes (Automático)</label>
+                    <input type="number" id="diasRestantes" class="input-field" value="90" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">Calculado automaticamente de hoje até 31/12/2025</small>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Sábados Extras por Mês</label>
+                    <input type="number" id="sabadosExtras" class="input-field" value="2" min="0" max="4" oninput="calcular()">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Meses Restantes</label>
+                    <input type="number" id="mesesRestantes" class="input-field" value="4" oninput="calcular()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span class="section-icon icon-results">📈</span>
+                    Resultados da Análise
+                </h3>
+                
+                <div class="result-item">
+                    <span class="result-label">Produtividade Média</span>
+                    <span id="produtividade" class="result-value">1,63 d.u./trabalho</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Esforço Necessário</span>
+                    <span id="esforco" class="result-value">96 dias úteis</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Capacidade Sem Sábados</span>
+                    <span id="capacidadeSem" class="result-value">90 dias úteis</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Capacidade Com Sábados</span>
+                    <span id="capacidadeCom" class="result-value success">98 dias úteis</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Sobra/Falta (Sem Sábados)</span>
+                    <span id="sobraSem" class="result-value warning">-6 dias úteis</span>
+                </div>
+                
+                <div class="result-item">
+                    <span class="result-label">Sobra/Falta (Com Sábados)</span>
+                    <span id="sobraCom" class="result-value success">+2 dias úteis</span>
+                </div>
+            </div>
+
+            <div class="section warning">
+                <h3 class="section-title">
+                    <span class="section-icon icon-analysis">⚖️</span>
+                    Cenário Sem Sábados
+                </h3>
+                <div id="verditoSem" class="verdict error">
+                    ❌ NÃO CABE - ESCORREGA PARA 2026
+                </div>
+            </div>
+
+            <div class="section success">
+                <h3 class="section-title">
+                    <span class="section-icon icon-analysis">✅</span>
+                    Cenário Com Sábados
+                </h3>
+                <div id="verdictoCom" class="verdict success">
+                    ✅ CABE EM 2025
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="section-title">
+                    <span class="section-icon icon-chart">📊</span>
+                    Comparativo Visual: Capacidade vs Esforço Necessário
+                </h3>
+                
+                <div class="chart">
+                    <div class="chart-group">
+                        <div class="chart-bars">
+                            <div id="barCapacidadeSem" class="chart-bar capacity" style="height: 180px;">90</div>
+                            <div id="barEsforcoSem" class="chart-bar effort" style="height: 192px;">96</div>
+                        </div>
+                        <div class="chart-label">Sem Sábados</div>
+                    </div>
+                    
+                    <div class="chart-group">
+                        <div class="chart-bars">
+                            <div id="barCapacidadeCom" class="chart-bar capacity" style="height: 196px;">98</div>
+                            <div id="barEsforcoSem2" class="chart-bar effort" style="height: 192px;">96</div>
+                        </div>
+                        <div class="chart-label">Com Sábados</div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color capacity"></div>
+                        <span>Capacidade Disponível</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color effort"></div>
+                        <span>Esforço Necessário</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="date-info">
+            <div class="current-date">Relatório gerado em: <span id="dataAtual"></span></div>
+            <div class="days-remaining">Base de cálculo: Janeiro-Agosto 2025 | Projeção: Setembro-Dezembro 2025</div>
+        </div>
+    </div>
+
+    <script>
+        // Função para calcular dias úteis entre duas datas (seg-sex)
+        function calcularDiasUteis(dataInicio, dataFim) {
+            let dias = 0;
+            let atual = new Date(dataInicio);
+            
+            while (atual <= dataFim) {
+                const diaSemana = atual.getDay();
+                // 1-5 = segunda a sexta
+                if (diaSemana >= 1 && diaSemana <= 5) {
+                    dias++;
+                }
+                atual.setDate(atual.getDate() + 1);
+            }
+            
+            return dias;
+        }
+        
+        function calcular() {
+            // Captura os valores dos inputs
+            const trabalhosEntregues = parseFloat(document.getElementById('trabalhosEntregues').value) || 0;
+            const diasPassados = parseFloat(document.getElementById('diasPassados').value) || 0;
+            const trabalhosPendentes = parseFloat(document.getElementById('trabalhosPendentes').value) || 0;
+            const diasRestantes = parseFloat(document.getElementById('diasRestantes').value) || 0;
+            const sabadosExtras = parseFloat(document.getElementById('sabadosExtras').value) || 0;
+            const mesesRestantes = parseFloat(document.getElementById('mesesRestantes').value) || 0;
+            
+            // Cálculos
+            const produtividade = trabalhosEntregues > 0 ? diasPassados / trabalhosEntregues : 0;
+            const esforco = trabalhosPendentes * produtividade;
+            const capacidadeSem = diasRestantes;
+            const capacidadeCom = diasRestantes + (sabadosExtras * mesesRestantes);
+            const sobraSem = capacidadeSem - esforco;
+            const sobraCom = capacidadeCom - esforco;
+            
+            // Atualiza os resultados
+            document.getElementById('produtividade').textContent = produtividade.toFixed(2) + ' d.u./trabalho';
+            document.getElementById('esforco').textContent = Math.round(esforco) + ' dias úteis';
+            document.getElementById('capacidadeSem').textContent = capacidadeSem + ' dias úteis';
+            document.getElementById('capacidadeCom').textContent = capacidadeCom + ' dias úteis';
+            
+            // Sobra/Falta
+            const sobraSemEl = document.getElementById('sobraSem');
+            const sobraComEl = document.getElementById('sobraCom');
+            
+            sobraSemEl.textContent = (sobraSem >= 0 ? '+' : '') + Math.round(sobraSem) + ' dias úteis';
+            sobraComEl.textContent = (sobraCom >= 0 ? '+' : '') + Math.round(sobraCom) + ' dias úteis';
+            
+            // Classes de cor
+            sobraSemEl.className = 'result-value ' + (sobraSem >= 0 ? 'success' : 'warning');
+            sobraComEl.className = 'result-value ' + (sobraCom >= 0 ? 'success' : 'warning');
+            
+            // Vereditos
+            const verditoSem = document.getElementById('verditoSem');
+            const verdictoCom = document.getElementById('verdictoCom');
+            
+            if (sobraSem >= 5) {
+                verditoSem.textContent = '✅ CABE TRANQUILAMENTE';
+                verditoSem.className = 'verdict success';
+            } else if (sobraSem >= 0) {
+                verditoSem.textContent = '⚠️ CABE APERTADO';
+                verditoSem.className = 'verdict warning';
+            } else {
+                verditoSem.textContent = '❌ NÃO CABE - ESCORREGA 2026';
+                verditoSem.className = 'verdict error';
+            }
+            
+            if (sobraCom >= 5) {
+                verdictoCom.textContent = '✅ CABE TRANQUILAMENTE EM 2025';
+                verdictoCom.className = 'verdict success';
+            } else if (sobraCom >= 0) {
+                verdictoCom.textContent = '⚠️ CABE APERTADO EM 2025';
+                verdictoCom.className = 'verdict warning';
+            } else {
+                verdictoCom.textContent = '❌ MESMO COM SÁBADOS NÃO CABE';
+                verdictoCom.className = 'verdict error';
+            }
+            
+            // Atualiza o gráfico
+            const maxValue = Math.max(capacidadeSem, capacidadeCom, esforco);
+            const scale = 200 / maxValue;
+            
+            document.getElementById('barCapacidadeSem').style.height = (capacidadeSem * scale) + 'px';
+            document.getElementById('barCapacidadeSem').textContent = capacidadeSem;
+            
+            document.getElementById('barEsforcoSem').style.height = (esforco * scale) + 'px';
+            document.getElementById('barEsforcoSem').textContent = Math.round(esforco);
+            
+            document.getElementById('barCapacidadeCom').style.height = (capacidadeCom * scale) + 'px';
+            document.getElementById('barCapacidadeCom').textContent = capacidadeCom;
+            
+            document.getElementById('barEsforcoSem2').style.height = (esforco * scale) + 'px';
+            document.getElementById('barEsforcoSem2').textContent = Math.round(esforco);
+        }
+        
+        // Atualiza a data atual
+        function atualizarData() {
+            const agora = new Date();
+            const opcoes = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'America/Sao_Paulo'
+            };
+            document.getElementById('dataAtual').textContent = agora.toLocaleDateString('pt-BR', opcoes);
+        }
+        
+        // Inicializa a página
+        document.addEventListener('DOMContentLoaded', function() {
+            atualizarData();
+            
+            // Calcula dias úteis restantes automaticamente
+            const hoje = new Date();
+            const fimAno = new Date(2025, 11, 31); // 31/12/2025
+            const diasUteisRestantes = calcularDiasUteis(hoje, fimAno);
+            
+            document.getElementById('diasRestantes').value = diasUteisRestantes;
+            
+            calcular();
+        });
+    </script>
+</body>
+</html>
