@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análise de Capacidade New Tech 2025 - Honda</title>
@@ -80,6 +81,47 @@
             font-size: 22px;
             opacity: 0.9;
             margin-top: 10px;
+        }
+
+        .sync-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-dot.syncing {
+            background: #f39c12;
+            animation: pulse 0.5s infinite;
+        }
+
+        .sync-dot.local {
+            background: #95a5a6;
+            animation: none;
+        }
+
+        .sync-dot.error {
+            background: #e74c3c;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .content-grid {
@@ -170,6 +212,40 @@
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .input-field.collaborative {
+            border-color: #27ae60;
+            background: linear-gradient(90deg, rgba(39, 174, 96, 0.05) 0%, rgba(255,255,255,1) 10%);
+        }
+
+        .input-field.collaborative:focus {
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .collaborative-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .local-badge {
+            display: inline-block;
+            background: #95a5a6;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
         }
 
         .result-item {
@@ -368,13 +444,18 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
+                <div class="sync-indicator">
+                    <div class="sync-dot" id="syncDot"></div>
+                    <span id="syncStatus">Carregando...</span>
+                </div>
+                
                 <div class="logo">
                     <div class="logo-icon">NT</div>
                     <div>
                         <h1 class="company-name">New Tech</h1>
                     </div>
                 </div>
-                <h2 class="report-title">Análise de Capacidade 2025 - Relatório Executivo</h2>
+                <h2 class="report-title" id="reportTitle">Análise de Capacidade 2025 - Relatório Executivo</h2>
             </div>
         </div>
 
@@ -386,8 +467,11 @@
                 </h3>
                 
                 <div class="input-group">
-                    <label class="input-label">Trabalhos Já Entregues (2025)</label>
-                    <input type="number" id="trabalhosEntregues" class="input-field" value="103" oninput="calcular()">
+                    <label class="input-label">
+                        Trabalhos Já Entregues (2025)
+                        <span class="collaborative-badge" id="badge1">Colaborativo</span>
+                    </label>
+                    <input type="number" id="trabalhosEntregues" class="input-field collaborative" value="103" oninput="saveAndCalculate()">
                 </div>
                 
                 <div class="input-group">
@@ -397,8 +481,11 @@
                 </div>
                 
                 <div class="input-group">
-                    <label class="input-label">Trabalhos Pendentes</label>
-                    <input type="number" id="trabalhosPendentes" class="input-field" value="59" oninput="calcular()">
+                    <label class="input-label">
+                        Trabalhos Pendentes
+                        <span class="collaborative-badge" id="badge2">Colaborativo</span>
+                    </label>
+                    <input type="number" id="trabalhosPendentes" class="input-field collaborative" value="59" oninput="saveAndCalculate()">
                 </div>
                 
                 <div class="input-group">
@@ -408,8 +495,11 @@
                 </div>
                 
                 <div class="input-group">
-                    <label class="input-label">Sábados Extras por Mês</label>
-                    <input type="number" id="sabadosExtras" class="input-field" value="2" min="0" max="4" oninput="calcular()">
+                    <label class="input-label">
+                        Sábados Extras por Mês
+                        <span class="collaborative-badge" id="badge3">Colaborativo</span>
+                    </label>
+                    <input type="number" id="sabadosExtras" class="input-field collaborative" value="2" min="0" max="4" oninput="saveAndCalculate()">
                 </div>
                 
                 <div class="input-group">
@@ -516,18 +606,48 @@
         <div class="date-info">
             <div class="current-date">Relatório gerado em: <span id="dataAtual"></span></div>
             <div class="days-remaining">Base de cálculo: Janeiro-Agosto 2025 | Projeção: Setembro-Dezembro 2025</div>
+            <div id="modeInfo" style="margin-top: 10px; font-size: 12px; opacity: 0.7;"></div>
         </div>
     </div>
 
     <script>
+        let isGoogleAppsScript = false;
+        let isUpdatingFromServer = false;
+        
+        // Detecta o ambiente
+        function detectEnvironment() {
+            isGoogleAppsScript = (typeof google !== 'undefined' && google.script) || 
+                               window.location.hostname === 'script.google.com';
+            
+            if (isGoogleAppsScript) {
+                document.getElementById('reportTitle').textContent = 'Análise de Capacidade 2025 - Colaborativo';
+                document.getElementById('modeInfo').innerHTML = '🌐 Modo colaborativo ativo - alterações sincronizadas em tempo real';
+            } else {
+                document.getElementById('reportTitle').textContent = 'Análise de Capacidade 2025 - Modo Local';
+                document.getElementById('modeInfo').innerHTML = '💻 Modo local - alterações não são sincronizadas';
+                
+                // Troca badges para "Local"
+                const badges = document.querySelectorAll('.collaborative-badge');
+                badges.forEach(badge => {
+                    badge.textContent = 'Local';
+                    badge.className = 'local-badge';
+                });
+                
+                // Remove classe collaborative dos inputs
+                const collaborativeInputs = document.querySelectorAll('.collaborative');
+                collaborativeInputs.forEach(input => {
+                    input.classList.remove('collaborative');
+                });
+            }
+        }
+
         // Função para calcular meses restantes até dezembro
         function calcularMesesRestantes(dataAtual) {
-            const fimAno = new Date(2025, 11, 31); // 31/12/2025
+            const fimAno = new Date(2025, 11, 31);
             const diffMs = fimAno - dataAtual;
             const diasRestantes = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            // Aproximadamente 30.44 dias por mês
             const mesesRestantes = diasRestantes / 30.44;
-            return Math.max(0, mesesRestantes); // Não pode ser negativo
+            return Math.max(0, mesesRestantes);
         }
 
         // Função para calcular dias úteis entre duas datas (seg-sex)
@@ -537,7 +657,6 @@
             
             while (atual <= dataFim) {
                 const diaSemana = atual.getDay();
-                // 1-5 = segunda a sexta
                 if (diaSemana >= 1 && diaSemana <= 5) {
                     dias++;
                 }
@@ -548,7 +667,8 @@
         }
         
         function calcular() {
-            // Captura os valores dos inputs
+            if (isUpdatingFromServer) return;
+            
             const trabalhosEntregues = parseFloat(document.getElementById('trabalhosEntregues').value) || 0;
             const diasPassados = parseFloat(document.getElementById('diasPassados').value) || 0;
             const trabalhosPendentes = parseFloat(document.getElementById('trabalhosPendentes').value) || 0;
@@ -556,7 +676,6 @@
             const sabadosExtras = parseFloat(document.getElementById('sabadosExtras').value) || 0;
             const mesesRestantes = parseFloat(document.getElementById('mesesRestantes').value) || 0;
             
-            // Cálculos
             const produtividade = trabalhosEntregues > 0 ? diasPassados / trabalhosEntregues : 0;
             const esforco = trabalhosPendentes * produtividade;
             const capacidadeSem = diasRestantes;
@@ -564,24 +683,20 @@
             const sobraSem = capacidadeSem - esforco;
             const sobraCom = capacidadeCom - esforco;
             
-            // Atualiza os resultados
             document.getElementById('produtividade').textContent = produtividade.toFixed(2) + ' d.u./trabalho';
             document.getElementById('esforco').textContent = Math.round(esforco) + ' dias úteis';
             document.getElementById('capacidadeSem').textContent = capacidadeSem + ' dias úteis';
             document.getElementById('capacidadeCom').textContent = capacidadeCom + ' dias úteis';
             
-            // Sobra/Falta
             const sobraSemEl = document.getElementById('sobraSem');
             const sobraComEl = document.getElementById('sobraCom');
             
             sobraSemEl.textContent = (sobraSem >= 0 ? '+' : '') + Math.round(sobraSem) + ' dias úteis';
             sobraComEl.textContent = (sobraCom >= 0 ? '+' : '') + Math.round(sobraCom) + ' dias úteis';
             
-            // Classes de cor
             sobraSemEl.className = 'result-value ' + (sobraSem >= 0 ? 'success' : 'warning');
             sobraComEl.className = 'result-value ' + (sobraCom >= 0 ? 'success' : 'warning');
             
-            // Vereditos
             const verditoSem = document.getElementById('verditoSem');
             const verdictoCom = document.getElementById('verdictoCom');
             
@@ -607,7 +722,6 @@
                 verdictoCom.className = 'verdict error';
             }
             
-            // Atualiza o gráfico
             const maxValue = Math.max(capacidadeSem, capacidadeCom, esforco);
             const scale = 200 / maxValue;
             
@@ -623,7 +737,82 @@
             document.getElementById('barEsforcoSem2').style.height = (esforco * scale) + 'px';
             document.getElementById('barEsforcoSem2').textContent = Math.round(esforco);
         }
-        
+
+        // Funções de sincronização
+        function updateSyncStatus(status, type = 'normal') {
+            const syncDot = document.getElementById('syncDot');
+            const syncStatus = document.getElementById('syncStatus');
+            
+            syncDot.className = 'sync-dot';
+            if (type === 'syncing') {
+                syncDot.classList.add('syncing');
+            } else if (type === 'local') {
+                syncDot.classList.add('local');
+            } else if (type === 'error') {
+                syncDot.classList.add('error');
+            }
+            
+            syncStatus.textContent = status;
+        }
+
+        function saveData() {
+            if (!isGoogleAppsScript) return;
+            
+            const data = {
+                trabalhosEntregues: parseFloat(document.getElementById('trabalhosEntregues').value),
+                trabalhosPendentes: parseFloat(document.getElementById('trabalhosPendentes').value),
+                sabadosExtras: parseFloat(document.getElementById('sabadosExtras').value)
+            };
+            
+            updateSyncStatus('Salvando...', 'syncing');
+            
+            if (google && google.script) {
+                google.script.run
+                    .withSuccessHandler(() => {
+                        updateSyncStatus('Sincronizado', 'normal');
+                    })
+                    .withFailureHandler((error) => {
+                        updateSyncStatus('Erro ao salvar', 'error');
+                        console.error('Erro:', error);
+                    })
+                    .saveDataFromClient(data);
+            }
+        }
+
+        function loadData() {
+            if (!isGoogleAppsScript) {
+                updateSyncStatus('Modo Local', 'local');
+                return;
+            }
+            
+            updateSyncStatus('Carregando...', 'syncing');
+            
+            if (google && google.script) {
+                google.script.run
+                    .withSuccessHandler((data) => {
+                        isUpdatingFromServer = true;
+                        document.getElementById('trabalhosEntregues').value = data.trabalhosEntregues || 103;
+                        document.getElementById('trabalhosPendentes').value = data.trabalhosPendentes || 59;
+                        document.getElementById('sabadosExtras').value = data.sabadosExtras || 2;
+                        calcular();
+                        updateSyncStatus('Sincronizado', 'normal');
+                        isUpdatingFromServer = false;
+                    })
+                    .withFailureHandler((error) => {
+                        updateSyncStatus('Erro ao carregar', 'error');
+                        console.error('Erro:', error);
+                        isUpdatingFromServer = false;
+                    })
+                    .getDataFromClient();
+            }
+        }
+
+        function saveAndCalculate() {
+            if (isUpdatingFromServer) return;
+            calcular();
+            saveData();
+        }
+
         // Atualiza a data atual
         function atualizarData() {
             const agora = new Date();
@@ -638,26 +827,34 @@
         
         // Inicializa a página
         document.addEventListener('DOMContentLoaded', function() {
+            detectEnvironment();
             atualizarData();
             
-            // Calcula dias úteis já passados automaticamente (de 02/01/2025 até hoje)
-            const inicioAno = new Date(2025, 0, 2); // 02/01/2025
+            // Calcula campos automáticos
+            const inicioAno = new Date(2025, 0, 2);
             const hoje = new Date();
+            const fimAno = new Date(2025, 11, 31);
+            
             const diasUteisPassados = calcularDiasUteis(inicioAno, hoje);
+            const diasUteisRestantes = calcularDiasUteis(hoje, fimAno);
+            const mesesRestantes = calcularMesesRestantes(hoje);
             
             document.getElementById('diasPassados').value = diasUteisPassados;
-            
-            // Calcula dias úteis restantes automaticamente (de hoje até 31/12/2025)
-            const fimAno = new Date(2025, 11, 31); // 31/12/2025
-            const diasUteisRestantes = calcularDiasUteis(hoje, fimAno);
-            
             document.getElementById('diasRestantes').value = diasUteisRestantes;
-            
-            // Calcula meses restantes automaticamente
-            const mesesRestantes = calcularMesesRestantes(hoje);
             document.getElementById('mesesRestantes').value = mesesRestantes.toFixed(1);
             
-            calcular();
+            // Carrega dados e inicializa
+            if (isGoogleAppsScript) {
+                setTimeout(() => {
+                    loadData();
+                }, 1000);
+                
+                // Sincronização automática a cada 15 segundos
+                setInterval(loadData, 15000);
+            } else {
+                updateSyncStatus('Modo Local', 'local');
+                calcular();
+            }
         });
     </script>
 </body>
