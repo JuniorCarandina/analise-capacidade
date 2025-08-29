@@ -413,8 +413,9 @@
                 </div>
                 
                 <div class="input-group">
-                    <label class="input-label">Meses Restantes</label>
-                    <input type="number" id="mesesRestantes" class="input-field" value="4" oninput="calcular()">
+                    <label class="input-label">Meses Restantes (Automático)</label>
+                    <input type="number" id="mesesRestantes" class="input-field" value="4" readonly style="background-color: #f8f9fa; cursor: not-allowed;" step="0.1">
+                    <small style="color: #6c757d; font-size: 12px; margin-top: 5px; display: block;">Calculado automaticamente de hoje até dezembro/2025</small>
                 </div>
             </div>
 
@@ -519,6 +520,16 @@
     </div>
 
     <script>
+        // Função para calcular meses restantes até dezembro
+        function calcularMesesRestantes(dataAtual) {
+            const fimAno = new Date(2025, 11, 31); // 31/12/2025
+            const diffMs = fimAno - dataAtual;
+            const diasRestantes = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            // Aproximadamente 30.44 dias por mês
+            const mesesRestantes = diasRestantes / 30.44;
+            return Math.max(0, mesesRestantes); // Não pode ser negativo
+        }
+
         // Função para calcular dias úteis entre duas datas (seg-sex)
         function calcularDiasUteis(dataInicio, dataFim) {
             let dias = 0;
@@ -641,6 +652,10 @@
             const diasUteisRestantes = calcularDiasUteis(hoje, fimAno);
             
             document.getElementById('diasRestantes').value = diasUteisRestantes;
+            
+            // Calcula meses restantes automaticamente
+            const mesesRestantes = calcularMesesRestantes(hoje);
+            document.getElementById('mesesRestantes').value = mesesRestantes.toFixed(1);
             
             calcular();
         });
